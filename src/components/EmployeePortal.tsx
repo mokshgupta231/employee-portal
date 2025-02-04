@@ -34,7 +34,7 @@ const EmployeePortal = () => {
 
     try {
       const response = await fetch(
-        "https://dev-pwot3ip1.it-cpi023-rt.cfapps.eu20-001.hana.ondemand.com/http/caseCreation",
+        "https://nagarrodev.test01.apimanagement.eu20.hana.ondemand.com:443/caseCreation",
         {
           method: "POST",
           headers: {
