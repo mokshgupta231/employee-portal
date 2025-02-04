@@ -57,3 +57,9 @@ h2 {
 .submit-button:hover {
   background: #0056b3;
 }
+
+.disabled-button {
+  background-color: #ccc;
+  cursor: not-allowed;
+  opacity: 0.6;
+}

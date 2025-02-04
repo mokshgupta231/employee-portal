@@ -52,15 +52,24 @@ const EmployeePortal = () => {
         }
       );
       if (response.ok) {
-        showAlert("Form submitted successfully!", "success");
+        showAlert("Success!", "success");
       } else {
+        showAlert(`Oops... Something went wrong.`, "error");
         console.info(response);
-        showAlert(`Failed to submit form`, "error");
       }
     } catch (error) {
-      showAlert(`Failed to submit form`, "error");
+      showAlert(`Oops... Something went wrong.`, "error");
       console.error("Error during form submission:", error);
     }
+  };
+
+  const isFormValid = () => {
+    if (formData.issueType === "Incentive Request") {
+      return (
+        formData.employeeID.trim() !== "" && formData.orderID.trim() !== ""
+      );
+    }
+    return false;
   };
 
   return (
@@ -109,7 +118,13 @@ const EmployeePortal = () => {
             </>
           )}
 
-          <button type="submit" className="submit-button">
+          <button
+            type="submit"
+            className={`submit-button ${
+              !isFormValid() ? "disabled-button" : ""
+            }`}
+            disabled={!isFormValid()}
+          >
             Submit
           </button>
         </form>
