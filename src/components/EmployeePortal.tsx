@@ -5,12 +5,19 @@ const EmployeePortal = () => {
   const [formData, setFormData] = useState({
     employeeId: "",
     orderId: "",
-    issueType: "Order Delay",
+    issueType: "Incentive Request",
   });
 
-  const issueTypes = ["Order Delay", "Product Issue", "Payment Issue"];
+  const issueTypes = [
+    "Incentive Request",
+    "Reimbursement Queries",
+    "Expense Settlement",
+    "IT Request",
+  ];
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
@@ -39,34 +46,48 @@ const EmployeePortal = () => {
         <h2>Employee Portal</h2>
         <form onSubmit={handleSubmit}>
           <div className="form-group">
-            <label>Employee ID</label>
-            <input
-              type="text"
-              name="employeeId"
-              value={formData.employeeId}
-              onChange={handleChange}
-              required
-            />
-          </div>
-          <div className="form-group">
-            <label>Order ID</label>
-            <input
-              type="text"
-              name="orderId"
-              value={formData.orderId}
-              onChange={handleChange}
-              required
-            />
-          </div>
-          <div className="form-group">
             <label>Issue Type</label>
-            <select name="issueType" value={formData.issueType} onChange={handleChange}>
+            <select
+              name="issueType"
+              value={formData.issueType}
+              onChange={handleChange}
+            >
               {issueTypes.map((type) => (
-                <option key={type} value={type}>{type}</option>
+                <option key={type} value={type}>
+                  {type}
+                </option>
               ))}
             </select>
           </div>
-          <button type="submit" className="submit-button">Submit</button>
+
+          {formData.issueType === "Incentive Request" && (
+            <>
+              <div className="form-group">
+                <label>Employee ID</label>
+                <input
+                  type="text"
+                  name="employeeId"
+                  value={formData.employeeId}
+                  onChange={handleChange}
+                  required
+                />
+              </div>
+              <div className="form-group">
+                <label>Order ID</label>
+                <input
+                  type="text"
+                  name="orderId"
+                  value={formData.orderId}
+                  onChange={handleChange}
+                  required
+                />
+              </div>
+            </>
+          )}
+
+          <button type="submit" className="submit-button">
+            Submit
+          </button>
         </form>
       </div>
     </div>
