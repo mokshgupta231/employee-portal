@@ -3,8 +3,8 @@ import "../index.css";
 
 const EmployeePortal = () => {
   const [formData, setFormData] = useState({
-    employeeId: "",
-    orderId: "",
+    employeeID: "",
+    orderID: "",
     issueType: "Incentive Request",
   });
 
@@ -25,15 +25,26 @@ const EmployeePortal = () => {
     e.preventDefault();
     console.log("Submitting form data:", formData);
 
+    const username =
+      "sb-5ffb6fb1-b1c0-43e3-b786-141d00067f10!b26498|it-rt-dev-pwot3ip1!b18631";
+    const password =
+      "95559218-8ff2-4e62-8290-7b70aa493ddd$8uT25mb3J1870ApajNjUyZq6vKZ4CqjyF0yul704-bs=";
+
+    const encodedCredentials = btoa(`${username}:${password}`);
+
     try {
       const response = await fetch(
         "https://dev-pwot3ip1.it-cpi023-rt.cfapps.eu20-001.hana.ondemand.com/http/caseCreation",
         {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Basic ${encodedCredentials}`,
+          },
           body: JSON.stringify(formData),
         }
       );
+
       if (response.ok) {
         alert("Form submitted successfully!");
       } else {
@@ -71,8 +82,8 @@ const EmployeePortal = () => {
                 <label>Employee ID</label>
                 <input
                   type="text"
-                  name="employeeId"
-                  value={formData.employeeId}
+                  name="employeeID"
+                  value={formData.employeeID}
                   onChange={handleChange}
                   required
                 />
@@ -81,8 +92,8 @@ const EmployeePortal = () => {
                 <label>Order ID</label>
                 <input
                   type="text"
-                  name="orderId"
-                  value={formData.orderId}
+                  name="orderID"
+                  value={formData.orderID}
                   onChange={handleChange}
                   required
                 />
