@@ -1,6 +1,5 @@
 import EmployeePortal from "./pages/EmployeePortal.tsx";
 
-
 const App = () => {
   return (
     <div className="app-container">
