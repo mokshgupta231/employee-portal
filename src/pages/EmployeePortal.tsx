@@ -8,27 +8,35 @@ const USERNAME =
 const PASSWORD =
   "95559218-8ff2-4e62-8290-7b70aa493ddd$8uT25mb3J1870ApajNjUyZq6vKZ4CqjyF0yul704-bs=";
 
+const issueTypes = [
+  "Incentive Request",
+  "Reimbursement Queries",
+  "Expense Settlement",
+  "IT Request",
+];
+
+const issueTypeMapping: Record<string, string> = {
+  "Incentive Request": "INCENTIVE_REQ",
+  "Reimbursement Queries": "REIMBURSEMENT_Q",
+  "Expense Settlement": "EXPENSE_SETTLE",
+  "IT Request": "IT_REQ",
+};
+
 const EmployeePortal = () => {
   const [formData, setFormData] = useState({
     employeeID: "",
     orderID: "",
-    issueType: "Incentive Request",
+    issueType: issueTypes[0],
   });
-
-  const issueTypes = [
-    "Incentive Request",
-    "Reimbursement Queries",
-    "Expense Settlement",
-    "IT Request",
-  ];
 
   const showAlert = (message: string, alertType: "success" | "error"): void => {
     if (alertType === "success") {
       StatusAlertService.showSuccess(message);
-    } else if (alertType === "error") {
+    } else {
       StatusAlertService.showError(message);
     }
   };
+
   const handleChange = (
     e: ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ) => {
@@ -37,7 +45,12 @@ const EmployeePortal = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const encodedCredentials = btoa(`${USERNAME}:${PASSWORD}}`);
+    const encodedCredentials = btoa(`${USERNAME}:${PASSWORD}`);
+
+    const requestData = {
+      ...formData,
+      issueType: issueTypeMapping[formData.issueType],
+    };
 
     try {
       const response = await fetch(
@@ -48,10 +61,10 @@ const EmployeePortal = () => {
             "Content-Type": "application/json",
             Authorization: `Basic ${encodedCredentials}`,
           },
-          body: JSON.stringify(formData),
+          body: JSON.stringify(requestData),
         }
       );
-      if (response.ok) {
+      if (response.ok && response.status !== 204) {
         showAlert("Success!", "success");
       } else {
         showAlert(`Oops... Something went wrong.`, "error");
