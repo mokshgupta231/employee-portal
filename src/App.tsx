@@ -1,6 +1,7 @@
-import EmployeePortal from "./components/EmployeePortal";
+import EmployeePortal from "./pages/EmployeePortal.tsx";
 
-const App: React.FC = () => {
+
+const App = () => {
   return (
     <div className="app-container">
       <EmployeePortal />
