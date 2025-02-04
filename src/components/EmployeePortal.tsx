@@ -24,19 +24,24 @@ const EmployeePortal = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     console.log("Submitting form data:", formData);
+
     try {
-      const response = await fetch("https://your-api-endpoint.com/submit", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
-      });
+      const response = await fetch(
+        "https://dev-pwot3ip1.it-cpi023-rt.cfapps.eu20-001.hana.ondemand.com/http/caseCreation",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(formData),
+        }
+      );
       if (response.ok) {
         alert("Form submitted successfully!");
       } else {
-        alert("Failed to submit form.");
+        alert("Failed to submit form. Status: " + response.status);
       }
     } catch (error) {
-      console.error("Error:", error);
+      console.error("Error during form submission:", error);
+      alert("An error occurred while submitting the form.");
     }
   };
 
