@@ -64,7 +64,7 @@ const EmployeePortal = () => {
           body: JSON.stringify(requestData),
         }
       );
-      if (response.ok && response.status !== 204) {
+      if (response.status === 201) {
         showAlert("Success!", "success");
       } else {
         showAlert(`Oops... Something went wrong.`, "error");
