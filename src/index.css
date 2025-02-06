@@ -42,7 +42,8 @@ h2 {
   margin-bottom: 0.3rem;
   font-weight: bold;
 }
-.form-group select{
+
+.form-group select {
   width: 100%;
 }
 
@@ -70,10 +71,6 @@ h2 {
   opacity: 0.6;
 }
 
-/* .input-field {
-  width: 300px;
-} */
-
 .company-logo-container {
   display: flex;
   justify-content: center;
@@ -86,7 +83,7 @@ h2 {
   object-fit: cover;
 }
 
-.bg-image{
+.bg-image {
   object-fit: cover;
   position: absolute;
   z-index: -1;

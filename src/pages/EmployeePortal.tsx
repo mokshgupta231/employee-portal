@@ -3,7 +3,7 @@ import StatusAlert, { StatusAlertService } from "react-status-alert";
 import "react-status-alert/dist/status-alert.css";
 import "../index.css";
 import logo from "../assets/SvartLogo.png";
-import BackgroudImage from '../assets/BackgroundImage.png'
+import BackgroudImage from "../assets/BackgroundImage.png";
 
 const USERNAME =
   "sb-5ffb6fb1-b1c0-43e3-b786-141d00067f10!b26498|it-rt-dev-pwot3ip1!b18631";
@@ -89,7 +89,7 @@ const EmployeePortal = () => {
 
   return (
     <div className="container">
-      <img src={BackgroudImage} className={'bg-image'}/>
+      <img src={BackgroudImage} className={"bg-image"} />
       <StatusAlert />
       <div className="form-container">
         <div className="company-logo-container">
