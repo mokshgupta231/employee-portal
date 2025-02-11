@@ -13,14 +13,16 @@ const PASSWORD =
 const issueTypes = [
   "Incentive Request",
   "Reimbursement Queries",
-  "Expense Settlement",
+  "Payroll Queries",
   "IT Request",
 ];
+const reimbursementTypes = ["Travel", "Internet", "Certification"];
+const currencyCodes = ["USD", "EUR", "INR", "GBP"];
 
 const issueTypeMapping: Record<string, string> = {
   "Incentive Request": "INCENTIVE_REQ",
   "Reimbursement Queries": "REIMBURSEMENT_Q",
-  "Expense Settlement": "EXPENSE_SETTLE",
+  "Payroll Queries": "PAYROLL_Q",
   "IT Request": "IT_REQ",
 };
 
@@ -29,27 +31,39 @@ const EmployeePortal = () => {
     employeeID: "",
     orderID: "",
     issueType: issueTypes[0],
+    reimbursementType: reimbursementTypes[0],
+    amountClaimed: "",
+    currencyCode: currencyCodes[0],
     attachment: null as File | null,
   });
 
-  const showAlert = (message: string, alertType: "success" | "error"): void => {
-    if (alertType === "success") {
-      StatusAlertService.showSuccess(message);
-    } else {
-      StatusAlertService.showError(message);
-    }
+  const showAlert = (message: string, alertType: "success" | "error") => {
+    alertType === "success"
+      ? StatusAlertService.showSuccess(message)
+      : StatusAlertService.showError(message);
   };
 
   const handleChange = (
     e: ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ) => {
-    const { name, value, files } = e.target as HTMLInputElement;
-
+    const { name, value, files, type } = e.target as HTMLInputElement;
     setFormData((prevData) => ({
       ...prevData,
-      [name]: files ? files[0] : value,
+      [name]: type === "file" ? files?.[0] || null : value,
     }));
   };
+
+  const validationRules: Record<string, () => boolean> = {
+    "Incentive Request": () =>
+      formData.employeeID.trim() !== "" && formData.orderID.trim() !== "",
+    "Reimbursement Queries": () =>
+      formData.employeeID.trim() !== "" &&
+      formData.amountClaimed.trim() !== "" &&
+      formData.currencyCode.trim() !== "" &&
+      formData.attachment !== null,
+  };
+
+  const isFormValid = validationRules[formData.issueType] ?? (() => false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -61,48 +75,27 @@ const EmployeePortal = () => {
     };
 
     const formDataToSend = new FormData();
-    formDataToSend.append("issueType", requestData.issueType);
-    formDataToSend.append("employeeID", requestData.employeeID);
-    if (formData.orderID) {
-      formDataToSend.append("orderID", requestData.orderID);
-    }
-    if (formData.attachment) {
-      formDataToSend.append("attachment", formData.attachment);
-    }
+    Object.entries(requestData).forEach(([key, value]) => {
+      if (value) formDataToSend.append(key, value.toString());
+    });
 
     try {
       const response = await fetch(
         "https://nagarrodev.test01.apimanagement.eu20.hana.ondemand.com:443/caseCreation",
         {
           method: "POST",
-          headers: {
-            Authorization: `Basic ${encodedCredentials}`,
-          },
+          headers: { Authorization: `Basic ${encodedCredentials}` },
           body: formDataToSend,
         }
       );
 
-      if (response.status === 201) {
-        showAlert("Success!", "success");
-      } else {
-        showAlert("Oops... Something went wrong.", "error");
-        console.info(response);
-      }
+      response.status === 201
+        ? showAlert("Success!", "success")
+        : showAlert("Oops... Something went wrong.", "error");
     } catch (error) {
       showAlert("Oops... Something went wrong.", "error");
-      console.error("Error during form submission:", error);
+      console.error("Error:", error);
     }
-  };
-
-  const isFormValid = () => {
-    if (formData.issueType === "Incentive Request") {
-      return (
-        formData.employeeID.trim() !== "" && formData.orderID.trim() !== ""
-      );
-    } else if (formData.issueType === "Reimbursement Queries") {
-      return formData.employeeID.trim() !== "" && formData.attachment !== null;
-    }
-    return false;
   };
 
   return (
@@ -130,45 +123,73 @@ const EmployeePortal = () => {
             </select>
           </div>
 
-          {/* Incentive Request Fields */}
+          <div className="form-group">
+            <label>Employee ID</label>
+            <input
+              type="text"
+              name="employeeID"
+              value={formData.employeeID}
+              onChange={handleChange}
+              required
+            />
+          </div>
+
           {formData.issueType === "Incentive Request" && (
-            <>
-              <div className="form-group">
-                <label>Employee ID</label>
-                <input
-                  type="text"
-                  name="employeeID"
-                  value={formData.employeeID}
-                  onChange={handleChange}
-                  required
-                />
-              </div>
-              <div className="form-group">
-                <label>Order ID</label>
-                <input
-                  type="text"
-                  name="orderID"
-                  value={formData.orderID}
-                  onChange={handleChange}
-                  required
-                />
-              </div>
-            </>
+            <div className="form-group">
+              <label>Order ID</label>
+              <input
+                type="text"
+                name="orderID"
+                value={formData.orderID}
+                onChange={handleChange}
+                required
+              />
+            </div>
           )}
 
-          {/* Reimbursement Queries Fields */}
           {formData.issueType === "Reimbursement Queries" && (
             <>
               <div className="form-group">
-                <label>Employee ID</label>
+                <label>Reimbursement Type</label>
+                <select
+                  name="reimbursementType"
+                  value={formData.reimbursementType}
+                  onChange={handleChange}
+                >
+                  {reimbursementTypes.map((type) => (
+                    <option key={type} value={type}>
+                      {type}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="form-group">
+                <label>Amount Claimed</label>
                 <input
-                  type="text"
-                  name="employeeID"
-                  value={formData.employeeID}
+                  type="number"
+                  name="amountClaimed"
+                  value={formData.amountClaimed}
                   onChange={handleChange}
                   required
                 />
               </div>
+
+              <div className="form-group">
+                <label>Currency Code</label>
+                <select
+                  name="currencyCode"
+                  value={formData.currencyCode}
+                  onChange={handleChange}
+                >
+                  {currencyCodes.map((code) => (
+                    <option key={code} value={code}>
+                      {code}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
               <div className="form-group">
                 <label>Attachment</label>
                 <input
@@ -184,10 +205,10 @@ const EmployeePortal = () => {
 
           <button
             type="submit"
+            disabled={!isFormValid()}
             className={`submit-button ${
               !isFormValid() ? "disabled-button" : ""
             }`}
-            disabled={!isFormValid()}
           >
             Submit
           </button>
