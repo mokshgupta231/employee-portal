@@ -167,7 +167,7 @@ const EmployeePortal = () => {
           {formData.issueType === "Reimbursement Queries" && (
             <>
               <div className="form-group">
-                <label>Reimbursement Type</label>
+                <label>Category</label>
                 <select
                   name="reimbursementType"
                   value={formData.reimbursementType}
