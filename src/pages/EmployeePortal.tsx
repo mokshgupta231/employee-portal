@@ -1,4 +1,4 @@
-import { ChangeEvent, useState } from "react";
+import { ChangeEvent, useState, useMemo, useCallback } from "react";
 import StatusAlert, { StatusAlertService } from "react-status-alert";
 import "react-status-alert/dist/status-alert.css";
 import "../index.css";
@@ -24,85 +24,104 @@ const issueTypeMapping: Record<string, string> = {
   "Payroll Queries": "PAYROLL_Q",
 };
 
+const reimbursementTypeMapping: Record<string, string> = {
+  Travel: "TRAVEL",
+  Internet: "INTERNET",
+  Certification: "CERTIFICATION",
+};
+
+const initialFormData = {
+  employeeID: "",
+  orderID: "",
+  issueType: issueTypes[0],
+  reimbursementType: reimbursementTypes[0],
+  amountClaimed: "",
+  currencyCode: currencyCodes[0],
+  attachment: null as File | null,
+};
+
 const EmployeePortal = () => {
-  const [formData, setFormData] = useState({
-    employeeID: "",
-    orderID: "",
-    issueType: issueTypes[0],
-    reimbursementType: reimbursementTypes[0],
-    amountClaimed: "",
-    currencyCode: currencyCodes[0],
-    attachment: null as File | null,
-  });
+  const [formData, setFormData] = useState(initialFormData);
 
-  const showAlert = (message: string, alertType: "success" | "error") => {
-    alertType === "success"
-      ? StatusAlertService.showSuccess(message)
-      : StatusAlertService.showError(message);
-  };
+  const showAlert = useCallback(
+    (message: string, alertType: "success" | "error") => {
+      alertType === "success"
+        ? StatusAlertService.showSuccess(message)
+        : StatusAlertService.showError(message);
+    },
+    []
+  );
 
-  const handleChange = (
-    e: ChangeEvent<HTMLInputElement | HTMLSelectElement>
-  ) => {
-    const { name, value, files, type } = e.target as HTMLInputElement;
-    setFormData((prevData) => ({
-      ...prevData,
-      [name]: type === "file" ? files?.[0] || null : value,
-    }));
-  };
+  const handleChange = useCallback(
+    (e: ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+      const { name, value, files, type } = e.target as HTMLInputElement;
+      setFormData((prevData) => ({
+        ...prevData,
+        [name]: type === "file" ? files?.[0] || null : value,
+      }));
+    },
+    []
+  );
 
-  const validationRules: Record<string, () => boolean> = {
-    "Incentive Request": () =>
-      formData.employeeID.trim() !== "" && formData.orderID.trim() !== "",
-    "Reimbursement Queries": () =>
-      formData.employeeID.trim() !== "" &&
-      formData.amountClaimed.trim() !== "" &&
-      formData.currencyCode.trim() !== "" &&
-      formData.attachment !== null,
-  };
-
-  const isFormValid = validationRules[formData.issueType] ?? (() => false);
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    const encodedCredentials = btoa(`${USERNAME}:${PASSWORD}`);
-
-    const requestData = {
-      ...formData,
-      issueType: issueTypeMapping[formData.issueType],
-    };
-
-    const formDataToSend = new FormData();
-    Object.entries(requestData).forEach(([key, value]) => {
-      if (value) formDataToSend.append(key, value.toString());
-    });
-
-    try {
-      const response = await fetch(
-        "https://nagarrodev.test01.apimanagement.eu20.hana.ondemand.com:443/caseCreation",
-        {
-          method: "POST",
-          headers: { Authorization: `Basic ${encodedCredentials}` },
-          body: formDataToSend,
-        }
+  const isFormValid = useMemo(() => {
+    const { employeeID, orderID, amountClaimed, attachment, issueType } =
+      formData;
+    if (issueType === "Incentive Request") {
+      return employeeID.trim() !== "" && orderID.trim() !== "";
+    } else if (issueType === "Reimbursement Queries") {
+      return (
+        employeeID.trim() !== "" &&
+        amountClaimed.trim() !== "" &&
+        attachment !== null
       );
-
-      response.status === 201
-        ? showAlert("Success!", "success")
-        : showAlert("Oops... Something went wrong.", "error");
-    } catch (error) {
-      showAlert("Oops... Something went wrong.", "error");
-      console.error("Error:", error);
     }
-  };
+    return false;
+  }, [formData]);
+
+  const handleSubmit = useCallback(
+    async (e: React.FormEvent) => {
+      e.preventDefault();
+      const encodedCredentials = btoa(`${USERNAME}:${PASSWORD}`);
+
+      const requestData = {
+        ...formData,
+        issueType: issueTypeMapping[formData.issueType],
+        reimbursementType: reimbursementTypeMapping[formData.reimbursementType],
+      };
+
+      const formDataToSend = new FormData();
+      Object.entries(requestData).forEach(([key, value]) => {
+        if (value) formDataToSend.append(key, value.toString());
+      });
+
+      try {
+        const response = await fetch(
+          "https://nagarrodev.test01.apimanagement.eu20.hana.ondemand.com:443/caseCreation",
+          {
+            method: "POST",
+            headers: { Authorization: `Basic ${encodedCredentials}` },
+            body: formDataToSend,
+          }
+        );
+
+        response.status === 201
+          ? showAlert("Success!", "success")
+          : showAlert("Oops... Something went wrong.", "error");
+      } catch (error) {
+        showAlert("Oops... Something went wrong.", "error");
+        console.error("Error:", error);
+      }
+    },
+    [formData, showAlert]
+  );
 
   return (
     <div className="container">
-      <img src={BackgroudImage} className="bg-image" />
+      <img src={BackgroudImage} className="bg-image" alt="background" />
       <StatusAlert />
       <div className="form-container">
         <div className="company-logo-container">
-          <img src={logo} className="company-logo" />
+          <img src={logo} className="company-logo" alt="company logo" />
         </div>
         <h2>Employee Portal</h2>
         <form onSubmit={handleSubmit}>
@@ -203,10 +222,8 @@ const EmployeePortal = () => {
 
           <button
             type="submit"
-            disabled={!isFormValid()}
-            className={`submit-button ${
-              !isFormValid() ? "disabled-button" : ""
-            }`}
+            disabled={!isFormValid}
+            className={`submit-button ${!isFormValid ? "disabled-button" : ""}`}
           >
             Submit
           </button>
