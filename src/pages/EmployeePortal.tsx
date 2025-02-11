@@ -29,6 +29,7 @@ const EmployeePortal = () => {
     employeeID: "",
     orderID: "",
     issueType: issueTypes[0],
+    attachment: null as File | null,
   });
 
   const showAlert = (message: string, alertType: "success" | "error"): void => {
@@ -42,7 +43,12 @@ const EmployeePortal = () => {
   const handleChange = (
     e: ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    const { name, value, files } = e.target as HTMLInputElement;
+
+    setFormData((prevData) => ({
+      ...prevData,
+      [name]: files ? files[0] : value,
+    }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -54,26 +60,36 @@ const EmployeePortal = () => {
       issueType: issueTypeMapping[formData.issueType],
     };
 
+    const formDataToSend = new FormData();
+    formDataToSend.append("issueType", requestData.issueType);
+    formDataToSend.append("employeeID", requestData.employeeID);
+    if (formData.orderID) {
+      formDataToSend.append("orderID", requestData.orderID);
+    }
+    if (formData.attachment) {
+      formDataToSend.append("attachment", formData.attachment);
+    }
+
     try {
       const response = await fetch(
         "https://nagarrodev.test01.apimanagement.eu20.hana.ondemand.com:443/caseCreation",
         {
           method: "POST",
           headers: {
-            "Content-Type": "application/json",
             Authorization: `Basic ${encodedCredentials}`,
           },
-          body: JSON.stringify(requestData),
+          body: formDataToSend,
         }
       );
+
       if (response.status === 201) {
         showAlert("Success!", "success");
       } else {
-        showAlert(`Oops... Something went wrong.`, "error");
+        showAlert("Oops... Something went wrong.", "error");
         console.info(response);
       }
     } catch (error) {
-      showAlert(`Oops... Something went wrong.`, "error");
+      showAlert("Oops... Something went wrong.", "error");
       console.error("Error during form submission:", error);
     }
   };
@@ -83,13 +99,15 @@ const EmployeePortal = () => {
       return (
         formData.employeeID.trim() !== "" && formData.orderID.trim() !== ""
       );
+    } else if (formData.issueType === "Reimbursement Queries") {
+      return formData.employeeID.trim() !== "" && formData.attachment !== null;
     }
     return false;
   };
 
   return (
     <div className="container">
-      <img src={BackgroudImage} className={"bg-image"} />
+      <img src={BackgroudImage} className="bg-image" />
       <StatusAlert />
       <div className="form-container">
         <div className="company-logo-container">
@@ -112,6 +130,7 @@ const EmployeePortal = () => {
             </select>
           </div>
 
+          {/* Incentive Request Fields */}
           {formData.issueType === "Incentive Request" && (
             <>
               <div className="form-group">
@@ -130,6 +149,32 @@ const EmployeePortal = () => {
                   type="text"
                   name="orderID"
                   value={formData.orderID}
+                  onChange={handleChange}
+                  required
+                />
+              </div>
+            </>
+          )}
+
+          {/* Reimbursement Queries Fields */}
+          {formData.issueType === "Reimbursement Queries" && (
+            <>
+              <div className="form-group">
+                <label>Employee ID</label>
+                <input
+                  type="text"
+                  name="employeeID"
+                  value={formData.employeeID}
+                  onChange={handleChange}
+                  required
+                />
+              </div>
+              <div className="form-group">
+                <label>Attachment</label>
+                <input
+                  type="file"
+                  name="attachment"
+                  accept=".pdf,.jpg,.png"
                   onChange={handleChange}
                   required
                 />
