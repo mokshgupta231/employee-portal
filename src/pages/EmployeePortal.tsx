@@ -14,7 +14,6 @@ const issueTypes = [
   "Incentive Request",
   "Reimbursement Queries",
   "Payroll Queries",
-  "IT Request",
 ];
 const reimbursementTypes = ["Travel", "Internet", "Certification"];
 const currencyCodes = ["USD", "EUR", "INR", "GBP"];
@@ -23,7 +22,6 @@ const issueTypeMapping: Record<string, string> = {
   "Incentive Request": "INCENTIVE_REQ",
   "Reimbursement Queries": "REIMBURSEMENT_Q",
   "Payroll Queries": "PAYROLL_Q",
-  "IT Request": "IT_REQ",
 };
 
 const EmployeePortal = () => {
