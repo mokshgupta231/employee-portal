@@ -90,3 +90,11 @@ h2 {
   height: 100%;
   width: 100%;
 }
+
+input::file-selector-button {
+  font-weight: bold;
+  color: #333;
+  padding: 0.5em;
+  border: thin solid grey;
+  border-radius: 3px;
+}
