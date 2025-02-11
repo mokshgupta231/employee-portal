@@ -174,7 +174,7 @@ const EmployeePortal = () => {
                 <input
                   type="file"
                   name="attachment"
-                  accept=".pdf,.jpg,.png"
+                  accept=".pdf,.jpg,.png,.doc,.docx"
                   onChange={handleChange}
                   required
                 />
