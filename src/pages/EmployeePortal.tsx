@@ -106,34 +106,78 @@ const EmployeePortal = () => {
       e.preventDefault();
       const encodedCredentials = btoa(`${USERNAME}:${PASSWORD}`);
 
-      const requestData = {
-        ...formData,
+      let requestData: Record<string, any> = {
+        employeeID: formData.employeeID,
         issueType: issueTypeMapping[formData.issueType],
-        reimbursementType: reimbursementTypeMapping[formData.reimbursementType],
-        paymentCategory: paymentCategoryMapping[formData.paymentCategory],
       };
 
-      const formDataToSend = new FormData();
-      Object.entries(requestData).forEach(([key, value]) => {
-        if (value) formDataToSend.append(key, value.toString());
-      });
+      if (formData.issueType === "Incentive Request" && formData.orderID) {
+        requestData.orderID = formData.orderID;
+      }
+
+      if (formData.issueType === "Reimbursement Queries") {
+        requestData = {
+          ...requestData,
+          reimbursementType:
+            reimbursementTypeMapping[formData.reimbursementType],
+          amountClaimed: formData.amountClaimed,
+          currencyCode: formData.currencyCode,
+        };
+      }
+
+      if (formData.issueType === "Payroll Queries") {
+        requestData = {
+          ...requestData,
+          paymentCategory: paymentCategoryMapping[formData.paymentCategory],
+          comment: formData.comment,
+        };
+      }
+
+      requestData = Object.fromEntries(
+        Object.entries(requestData).filter(([_, v]) => v !== undefined)
+      );
+
+      const encodeFileToBase64 = (file: File): Promise<string> => {
+        return new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.readAsDataURL(file);
+          reader.onload = () => resolve(reader.result as string);
+          reader.onerror = reject;
+        });
+      };
 
       try {
+        if (
+          formData.issueType === "Reimbursement Queries" &&
+          formData.attachment
+        ) {
+          requestData.attachment = await encodeFileToBase64(
+            formData.attachment
+          );
+        }
+
         const response = await fetch(
           "https://nagarrodev.test01.apimanagement.eu20.hana.ondemand.com:443/caseCreation",
           {
             method: "POST",
-            headers: { Authorization: `Basic ${encodedCredentials}` },
-            body: formDataToSend,
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Basic ${encodedCredentials}`,
+            },
+            body: JSON.stringify(requestData),
           }
         );
 
-        response.status === 201
-          ? showAlert("Success!", "success")
-          : showAlert("Oops... Something went wrong.", "error");
+        if (response.status === 201) {
+          showAlert("Success!", "success");
+        } else {
+          const errorText = await response.text();
+          console.error("API Error:", response.status, errorText);
+          showAlert("Oops... Something went wrong.", "error");
+        }
       } catch (error) {
-        showAlert("Oops... Something went wrong.", "error");
         console.error("Error:", error);
+        showAlert("Oops... Something went wrong.", "error");
       }
     },
     [formData, showAlert]
