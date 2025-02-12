@@ -16,6 +16,11 @@ const issueTypes = [
   "Payroll Queries",
 ];
 const reimbursementTypes = ["Travel", "Internet", "Certification"];
+const paymentCategories = [
+  "Salary Discrepancy",
+  "Salary not credited",
+  "Advance salary",
+];
 const currencyCodes = ["USD", "EUR", "INR", "GBP"];
 
 const issueTypeMapping: Record<string, string> = {
@@ -30,14 +35,22 @@ const reimbursementTypeMapping: Record<string, string> = {
   Certification: "CERTIFICATION",
 };
 
+const paymentCategoryMapping: Record<string, string> = {
+  "Salary Discrepancy": "SALARY_DISCREPANCY",
+  "Salary not credited": "SALARY_NOT_CREDITED",
+  "Advance salary": "ADVANCE_SALARY",
+};
+
 const initialFormData = {
   employeeID: "",
   orderID: "",
   issueType: issueTypes[0],
   reimbursementType: reimbursementTypes[0],
+  paymentCategory: paymentCategories[0],
   amountClaimed: "",
   currencyCode: currencyCodes[0],
   attachment: null as File | null,
+  comment: "",
 };
 
 const EmployeePortal = () => {
@@ -53,7 +66,9 @@ const EmployeePortal = () => {
   );
 
   const handleChange = useCallback(
-    (e: ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    (
+      e: ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
+    ) => {
       const { name, value, files, type } = e.target as HTMLInputElement;
       setFormData((prevData) => ({
         ...prevData,
@@ -64,8 +79,14 @@ const EmployeePortal = () => {
   );
 
   const isFormValid = useMemo(() => {
-    const { employeeID, orderID, amountClaimed, attachment, issueType } =
-      formData;
+    const {
+      employeeID,
+      orderID,
+      amountClaimed,
+      attachment,
+      issueType,
+      comment,
+    } = formData;
     if (issueType === "Incentive Request") {
       return employeeID.trim() !== "" && orderID.trim() !== "";
     } else if (issueType === "Reimbursement Queries") {
@@ -74,6 +95,8 @@ const EmployeePortal = () => {
         amountClaimed.trim() !== "" &&
         attachment !== null
       );
+    } else if (issueType === "Payroll Queries") {
+      return employeeID.trim() !== "" && comment.trim() !== "";
     }
     return false;
   }, [formData]);
@@ -87,6 +110,7 @@ const EmployeePortal = () => {
         ...formData,
         issueType: issueTypeMapping[formData.issueType],
         reimbursementType: reimbursementTypeMapping[formData.reimbursementType],
+        paymentCategory: paymentCategoryMapping[formData.paymentCategory],
       };
 
       const formDataToSend = new FormData();
@@ -193,7 +217,7 @@ const EmployeePortal = () => {
               </div>
 
               <div className="form-group">
-                <label>Currency Code</label>
+                <label>Currency</label>
                 <select
                   name="currencyCode"
                   value={formData.currencyCode}
@@ -213,6 +237,35 @@ const EmployeePortal = () => {
                   type="file"
                   name="attachment"
                   accept=".pdf,.jpg,.png,.doc,.docx"
+                  onChange={handleChange}
+                  required
+                />
+              </div>
+            </>
+          )}
+
+          {formData.issueType === "Payroll Queries" && (
+            <>
+              <div className="form-group">
+                <label>Category</label>
+                <select
+                  name="paymentCategory"
+                  value={formData.paymentCategory}
+                  onChange={handleChange}
+                >
+                  {paymentCategories.map((category) => (
+                    <option key={category} value={category}>
+                      {category}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="form-group">
+                <label>Comment</label>
+                <textarea
+                  name="comment"
+                  value={formData.comment}
                   onChange={handleChange}
                   required
                 />
