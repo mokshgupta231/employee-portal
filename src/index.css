@@ -98,3 +98,22 @@ input::file-selector-button {
   border: thin solid grey;
   border-radius: 3px;
 }
+
+@media (max-width: 1500px) {
+  .form-container {
+    font-size: 0.85rem;
+    max-height: 450px;
+    overflow-y: auto;
+    scrollbar-width: none;
+  }
+
+  .form-container input,
+  .form-container select {
+    font-size: 0.85rem;
+    padding: 6px;
+  }
+
+  .form-container label {
+    font-size: 0.8rem;
+  }
+}
