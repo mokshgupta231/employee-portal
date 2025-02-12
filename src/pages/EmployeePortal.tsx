@@ -18,8 +18,8 @@ const issueTypes = [
 const reimbursementTypes = ["Travel", "Internet", "Certification"];
 const paymentCategories = [
   "Salary Discrepancy",
-  "Salary not credited",
-  "Advance salary",
+  "Salary Not Credited",
+  "Advance Salary",
 ];
 const currencyCodes = ["USD", "EUR", "INR", "GBP"];
 
@@ -37,8 +37,8 @@ const reimbursementTypeMapping: Record<string, string> = {
 
 const paymentCategoryMapping: Record<string, string> = {
   "Salary Discrepancy": "SALARY_DISCREPANCY",
-  "Salary not credited": "SALARY_NOT_CREDITED",
-  "Advance salary": "ADVANCE_SALARY",
+  "Salary Not Credited": "SALARY_NOT_CREDITED",
+  "Advance Salary": "ADVANCE_SALARY",
 };
 
 const initialFormData = {
