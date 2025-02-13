@@ -65,6 +65,21 @@ const EmployeePortal = () => {
     []
   );
 
+  const handleIssueTypeChange = (e: ChangeEvent<HTMLSelectElement>) => {
+    setFormData((prevData) => ({
+      ...prevData,
+      issueType: e.target.value,
+      employeeID: "",
+      orderID: "",
+      reimbursementType: reimbursementTypes[0],
+      amountClaimed: "",
+      currencyCode: currencyCodes[0],
+      paymentCategory: paymentCategories[0],
+      comment: "",
+      attachment: null,
+    }));
+  };
+
   const handleChange = useCallback(
     (
       e: ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
@@ -170,6 +185,7 @@ const EmployeePortal = () => {
 
         if (response.status === 201) {
           showAlert("Success!", "success");
+          setFormData(initialFormData);
         } else {
           const errorText = await response.text();
           console.error("API Error:", response.status, errorText);
@@ -198,7 +214,7 @@ const EmployeePortal = () => {
             <select
               name="issueType"
               value={formData.issueType}
-              onChange={handleChange}
+              onChange={handleIssueTypeChange}
             >
               {issueTypes.map((type) => (
                 <option key={type} value={type}>
