@@ -21,6 +21,7 @@ body {
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
   padding-inline: 3%;
   text-align: center;
+  font-size: 0.85rem;
 }
 
 h2 {
@@ -49,10 +50,10 @@ h2 {
 
 .form-group input,
 .form-group select {
-  padding: 0.5rem;
   border: 1px solid #ccc;
   border-radius: 4px;
-  font-size: 1rem;
+  font-size: 0.85rem;
+  padding: 0.5rem;
 }
 
 .submit-button {
@@ -101,19 +102,8 @@ input::file-selector-button {
 
 @media (max-width: 1500px) {
   .form-container {
-    font-size: 0.85rem;
     max-height: 450px;
     overflow-y: auto;
     scrollbar-width: none;
-  }
-
-  .form-container input,
-  .form-container select {
-    font-size: 0.85rem;
-    padding: 6px;
-  }
-
-  .form-container label {
-    font-size: 0.8rem;
   }
 }
