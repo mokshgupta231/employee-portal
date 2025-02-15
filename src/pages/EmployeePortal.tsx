@@ -4,6 +4,7 @@ import "react-status-alert/dist/status-alert.css";
 import "../index.css";
 import logo from "../assets/SvartLogo.png";
 import BackgroudImage from "../assets/BackgroundImage.png";
+import Loader from "../components/Loader";
 
 const USERNAME =
   "sb-5ffb6fb1-b1c0-43e3-b786-141d00067f10!b26498|it-rt-dev-pwot3ip1!b18631";
@@ -55,6 +56,7 @@ const initialFormData = {
 
 const EmployeePortal = () => {
   const [formData, setFormData] = useState(initialFormData);
+  const [loading, setLoading] = useState(false);
 
   const showAlert = useCallback(
     (message: string, alertType: "success" | "error") => {
@@ -119,6 +121,8 @@ const EmployeePortal = () => {
   const handleSubmit = useCallback(
     async (e: React.FormEvent) => {
       e.preventDefault();
+      setLoading(true);
+
       const encodedCredentials = btoa(`${USERNAME}:${PASSWORD}`);
 
       let requestData: Record<string, any> = {
@@ -194,6 +198,8 @@ const EmployeePortal = () => {
       } catch (error) {
         console.error("Error:", error);
         showAlert("Oops... Something went wrong.", "error");
+      } finally {
+        setLoading(false);
       }
     },
     [formData, showAlert]
@@ -338,7 +344,7 @@ const EmployeePortal = () => {
             disabled={!isFormValid}
             className={`submit-button ${!isFormValid ? "disabled-button" : ""}`}
           >
-            Submit
+            {loading ? <Loader /> : "Submit"}
           </button>
         </form>
       </div>
