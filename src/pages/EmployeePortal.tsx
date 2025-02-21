@@ -1,4 +1,5 @@
-import { ChangeEvent, useState, useMemo, useCallback } from "react";
+import { useState, useMemo, useCallback, useEffect } from "react";
+import { useSearchParams } from "react-router-dom";
 import StatusAlert, { StatusAlertService } from "react-status-alert";
 import "react-status-alert/dist/status-alert.css";
 import "../index.css";
@@ -43,7 +44,6 @@ const paymentCategoryMapping: Record<string, string> = {
 };
 
 const initialFormData = {
-  employeeID: "",
   orderID: "",
   issueType: issueTypes[0],
   reimbursementType: reimbursementTypes[0],
@@ -55,6 +55,8 @@ const initialFormData = {
 };
 
 const EmployeePortal = () => {
+  const [searchParams] = useSearchParams();
+  const employeeID = searchParams.get("employee_id");
   const [formData, setFormData] = useState(initialFormData);
   const [loading, setLoading] = useState(false);
 
@@ -67,24 +69,18 @@ const EmployeePortal = () => {
     []
   );
 
-  const handleIssueTypeChange = (e: ChangeEvent<HTMLSelectElement>) => {
-    setFormData((prevData) => ({
-      ...prevData,
+  const handleIssueTypeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setFormData({
+      ...initialFormData,
       issueType: e.target.value,
-      employeeID: "",
-      orderID: "",
-      reimbursementType: reimbursementTypes[0],
-      amountClaimed: "",
-      currencyCode: currencyCodes[0],
-      paymentCategory: paymentCategories[0],
-      comment: "",
-      attachment: null,
-    }));
+    });
   };
 
   const handleChange = useCallback(
     (
-      e: ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
+      e: React.ChangeEvent<
+        HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
+      >
     ) => {
       const { name, value, files, type } = e.target as HTMLInputElement;
       setFormData((prevData) => ({
@@ -96,24 +92,13 @@ const EmployeePortal = () => {
   );
 
   const isFormValid = useMemo(() => {
-    const {
-      employeeID,
-      orderID,
-      amountClaimed,
-      attachment,
-      issueType,
-      comment,
-    } = formData;
+    const { orderID, amountClaimed, attachment, issueType, comment } = formData;
     if (issueType === "Incentive Request") {
-      return employeeID.trim() !== "" && orderID.trim() !== "";
+      return orderID.trim() !== "";
     } else if (issueType === "Reimbursement Queries") {
-      return (
-        employeeID.trim() !== "" &&
-        amountClaimed.trim() !== "" &&
-        attachment !== null
-      );
+      return amountClaimed.trim() !== "" && attachment !== null;
     } else if (issueType === "Payroll Queries") {
-      return employeeID.trim() !== "" && comment.trim() !== "";
+      return comment.trim() !== "";
     }
     return false;
   }, [formData]);
@@ -123,10 +108,16 @@ const EmployeePortal = () => {
       e.preventDefault();
       setLoading(true);
 
+      if (!employeeID) {
+        showAlert("Employee ID is missing in the URL", "error");
+        setLoading(false);
+        return;
+      }
+
       const encodedCredentials = btoa(`${USERNAME}:${PASSWORD}`);
 
       let requestData: Record<string, any> = {
-        employeeID: formData.employeeID,
+        employeeID,
         issueType: issueTypeMapping[formData.issueType],
       };
 
@@ -202,7 +193,7 @@ const EmployeePortal = () => {
         setLoading(false);
       }
     },
-    [formData, showAlert]
+    [formData, showAlert, employeeID]
   );
 
   return (
@@ -228,17 +219,6 @@ const EmployeePortal = () => {
                 </option>
               ))}
             </select>
-          </div>
-
-          <div className="form-group">
-            <label>Employee ID</label>
-            <input
-              type="text"
-              name="employeeID"
-              value={formData.employeeID}
-              onChange={handleChange}
-              required
-            />
           </div>
 
           {formData.issueType === "Incentive Request" && (
